@@ -33,3 +33,19 @@ def test_atlas_page_classification():
 
 def test_irrelevant_biblehub_page_is_rejected():
     assert classify_url("https://biblehub.com/greek/3056.htm") is None
+
+
+def test_classify_topical_discovery_pages():
+    from crawler.url_utils import classify_url
+
+    assert classify_url("https://biblehub.com/topical/") == "topical_index"
+    assert classify_url("https://biblehub.com/topical/a.htm") == "topical_index"
+    assert classify_url("https://biblehub.com/topical/m/moses.htm") == "topical"
+
+
+def test_classify_atlas_discovery_pages():
+    from crawler.url_utils import classify_url
+
+    assert classify_url("https://biblehub.com/atlas/") == "atlas_index"
+    assert classify_url("https://biblehub.com/atlas/b.htm") == "atlas_index"
+    assert classify_url("https://biblehub.com/atlas/jerusalem.htm") == "atlas"

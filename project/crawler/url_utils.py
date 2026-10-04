@@ -76,6 +76,10 @@ BOOK_SLUGS = {
 BOOK_RE = "|".join(sorted((re.escape(book) for book in BOOK_SLUGS), key=len, reverse=True))
 BIBLE_PATTERN = re.compile(rf"^/(?:{BOOK_RE})/\d+\.htm$")
 COMMENTARY_PATTERN = re.compile(rf"^/commentaries/(?:{BOOK_RE})/\d+(?:-\d+)?\.htm$")
+TOPICAL_DIRECTORY_PATTERN = re.compile(r"^/topical/[a-z]\.htm$")
+TOPICAL_DOCUMENT_PATTERN = re.compile(r"^/topical/[^/]+/[^/]+\.htm$")
+ATLAS_DIRECTORY_PATTERN = re.compile(r"^/atlas/[a-z]\.htm$")
+ATLAS_DOCUMENT_PATTERN = re.compile(r"^/atlas/[^/]+\.htm$")
 
 
 def normalize_url(url: str, base_url: str = "https://biblehub.com/") -> str | None:
@@ -110,10 +114,18 @@ def classify_url(url: str) -> str | None:
     if COMMENTARY_PATTERN.fullmatch(path):
         return "commentary"
 
-    if path == "/topical/" or (path.startswith("/topical/") and path.endswith(".htm")):
+    # Discovery pages are intentionally crawlable: they expose links to actual
+    # topical/atlas documents. They are not search documents themselves.
+    if path == "/topical/" or TOPICAL_DIRECTORY_PATTERN.fullmatch(path):
+        return "topical_index"
+
+    if TOPICAL_DOCUMENT_PATTERN.fullmatch(path):
         return "topical"
 
-    if path == "/atlas/" or (path.startswith("/atlas/") and path.endswith(".htm")):
+    if path == "/atlas/" or ATLAS_DIRECTORY_PATTERN.fullmatch(path):
+        return "atlas_index"
+
+    if ATLAS_DOCUMENT_PATTERN.fullmatch(path):
         return "atlas"
 
     return None

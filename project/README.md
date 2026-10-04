@@ -129,3 +129,98 @@ python scripts/show_samples.py --limit 5
 ```
 
 This prints URL, document type, title, HTTP status, response size and raw HTML path for five saved pages.
+
+# Extractor
+
+The extractor converts saved raw HTML into clean documents for the later full-text index.
+It never modifies the original crawl data.
+
+```text
+data/raw/html/*.html
+        |
+        v
+    extractor
+        |
+        +--> data/processed/documents.jsonl
+        +--> data/processed/invalid_documents.jsonl
+        +--> data/processed/extraction_summary.json
+```
+
+The first version uses one content page as one search document:
+
+- `bible` — one Bible chapter; book, chapter and individual verses are retained
+- `commentary` — one aggregated commentary page for a chapter or verse
+- `topical` — one topical article such as `/topical/m/moses.htm`
+- `atlas` — one place article such as `/atlas/jerusalem.htm`, containing occurrences and encyclopedia material when present
+
+Directory pages are crawlable but are **not** search documents. This includes the
+`/topical/` and `/atlas/` roots and alphabetical directories such as
+`/topical/a.htm` and `/atlas/b.htm`. They are used only to discover links to real
+content pages. The extractor also recognizes and skips these pages in metadata
+created by older crawler versions, so an existing crawl does not need to be repeated.
+
+URL metadata and content boundaries are recognized with regular expressions. BeautifulSoup is used only to convert the HTML into a robust sequence of visible text fragments and to remove non-content tags such as scripts, forms and iframes. Extraction does not depend on an exact XPath tree.
+
+## Run the extractor
+
+Start with a small sample:
+
+```bash
+python -m extractor --limit 5
+```
+
+Inspect the extracted text:
+
+```bash
+python scripts/show_extracted.py --limit 5
+```
+
+Inspect extraction statistics:
+
+```bash
+python scripts/extraction_stats.py
+```
+
+If any pages fail validation:
+
+```bash
+python scripts/show_invalid.py --limit 20
+```
+
+When the sample looks correct, process every saved page:
+
+```bash
+python -m extractor
+```
+
+Running the extractor again rebuilds only the derived files in `data/processed/`. Raw HTML and crawler metadata remain unchanged.
+
+## Extracted document schema
+
+Every valid document contains common fields such as:
+
+```json
+{
+    "document_id": "...",
+    "url": "https://biblehub.com/genesis/1.htm",
+    "document_type": "bible",
+    "title": "Genesis 1",
+    "text": "1 ...\n2 ...",
+    "text_length": 4123,
+    "word_count": 790,
+    "text_hash": "...",
+    "valid": true,
+    "validation_errors": []
+}
+```
+
+Type-specific metadata are added as well:
+
+- Bible: `book`, `chapter`, `verse_count`, `verses`
+- Commentary: `book`, `chapter`, `verse`, `reference`
+- Topical: `topic`
+- Atlas: `place`, `has_occurrences`, `has_encyclopedia`
+
+## Validation
+
+The extractor checks that a document has usable text and the metadata required for its type. Invalid pages are not silently discarded. They are written to `data/processed/invalid_documents.jsonl` together with validation errors so that extraction rules can be improved against real examples.
