@@ -99,6 +99,7 @@ class ExtractionPipeline:
         started_at = utc_now()
         type_counts: Counter[str] = Counter()
         valid_type_counts: Counter[str] = Counter()
+        valid_source_collection_counts: Counter[str] = Counter()
         error_counts: Counter[str] = Counter()
         valid_count = 0
         invalid_count = 0
@@ -114,10 +115,9 @@ class ExtractionPipeline:
                 document_type = metadata.get("document_type")
                 url = str(metadata.get("url") or "")
 
-                # Older crawls may have classified the root/alphabetical directory
-                # pages as topical/atlas. Detect them from the URL as well so users
-                # do not need to crawl the data again after upgrading the extractor.
-                if is_discovery_page(url):
+                # Fresh crawls carry this flag directly in crawler metadata. Keep
+                # the URL fallback for compatibility with older stored datasets.
+                if metadata.get("is_discovery_page") or is_discovery_page(url):
                     skipped_count += 1
                     skipped_discovery_pages += 1
                     continue
@@ -140,7 +140,7 @@ class ExtractionPipeline:
                         "document_type": document_type,
                         "fetched_at": metadata.get("fetched_at"),
                         "extracted_at": utc_now(),
-                        "extractor_version": "0.2",
+                        "extractor_version": "0.6",
                         "raw_html_path": metadata.get("raw_html_path"),
                         "source_content_hash": metadata.get("content_hash"),
                         **extracted,
@@ -161,6 +161,9 @@ class ExtractionPipeline:
                     else:
                         valid_count += 1
                         valid_type_counts[document_type] += 1
+                        source_collection = document.get("source_collection")
+                        if source_collection:
+                            valid_source_collection_counts[str(source_collection)] += 1
                         total_text_characters += document["text_length"]
                         self._write_jsonl(documents_handle, document)
 
@@ -195,6 +198,7 @@ class ExtractionPipeline:
             "total_text_characters": total_text_characters,
             "source_type_counts": dict(sorted(type_counts.items())),
             "valid_type_counts": dict(sorted(valid_type_counts.items())),
+            "valid_source_collection_counts": dict(sorted(valid_source_collection_counts.items())),
             "validation_error_counts": dict(sorted(error_counts.items())),
             "documents_file": str(self.paths.documents_file.relative_to(self.paths.project_root)),
             "invalid_file": str(self.paths.invalid_file.relative_to(self.paths.project_root)),

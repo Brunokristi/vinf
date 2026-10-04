@@ -43,6 +43,8 @@ def main() -> None:
                 print(f"Reference:  {document['reference']}")
             elif document["document_type"] == "topical":
                 print(f"Topic:      {document['topic']}")
+                if document.get("source_collection"):
+                    print(f"Collection: {document['source_collection']}")
             elif document["document_type"] == "atlas":
                 print(f"Place:      {document['place']}")
 

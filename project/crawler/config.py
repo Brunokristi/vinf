@@ -12,7 +12,7 @@ class Settings:
     allowed_domain: str = "biblehub.com"
     user_agent: str = os.getenv(
         "BSE_USER_AGENT",
-        "BiblicalSearchEngine/0.1 (student research project; contact: xkristian@stuba.sk)",
+        "BiblicalSearchEngine/0.1 (student research project; contact: replace-me@example.com)",
     )
     accept: str = "text/html,application/xhtml+xml"
     accept_language: str = "en-US,en;q=0.9"

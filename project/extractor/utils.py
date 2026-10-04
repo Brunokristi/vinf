@@ -243,9 +243,11 @@ def is_discovery_page(url: str) -> bool:
     path = urlsplit(url).path.lower()
     return (
         path == "/topical/"
+        or path in {"/topical/naves.htm", "/topical/ttt.htm"}
         or TOPICAL_DIRECTORY_PATTERN.fullmatch(path) is not None
         or path == "/atlas/"
         or ATLAS_DIRECTORY_PATTERN.fullmatch(path) is not None
+        or re.fullmatch(r"/(?:" + "|".join(re.escape(slug) for slug in BOOK_NAMES) + r")/(?:index\.htm)?", path) is not None
     )
 
 def text_hash(text: str) -> str:
