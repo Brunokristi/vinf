@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+.DS_Store
+
+data/raw/html/*.html
+data/metadata/pages.jsonl
+data/metadata/run_summary.json
+data/metadata/robots.txt
+data/state/seen_urls.txt
+data/state/visited_urls.txt
+data/errors/errors.jsonl
