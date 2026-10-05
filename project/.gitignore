@@ -11,3 +11,4 @@ data/metadata/robots.txt
 data/state/seen_urls.txt
 data/state/visited_urls.txt
 data/errors/errors.jsonl
+/data/
