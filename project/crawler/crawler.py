@@ -43,7 +43,7 @@ class BiblicalCrawler:
         title = soup.title.get_text(" ", strip=True)
         return title or None
 
-    def crawl(self, max_pages: int = 20) -> dict:
+    def crawl(self, max_pages: int | None = None) -> dict:
         started_at = self.storage.utc_now()
         started_monotonic = time.monotonic()
 
@@ -60,7 +60,7 @@ class BiblicalCrawler:
         saved_by_group: Counter[str] = Counter()
         saved_by_document_type: Counter[str] = Counter()
 
-        while downloaded < max_pages:
+        while max_pages is None or downloaded < max_pages:
             next_item = self.frontier.pop()
             if next_item is None:
                 break
@@ -195,8 +195,9 @@ class BiblicalCrawler:
             downloaded += 1
             saved_by_group[classification.crawl_group] += 1
             saved_by_document_type[classification.document_type] += 1
+            limit_label = str(max_pages) if max_pages is not None else "unlimited"
             print(
-                f"[SAVED {downloaded}/{max_pages}] "
+                f"[SAVED {downloaded}/{limit_label}] "
                 f"group={classification.crawl_group} "
                 f"type={classification.document_type} "
                 f"links_new={new_links} derived_new={new_derived} "

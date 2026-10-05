@@ -12,8 +12,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--max-pages",
         type=int,
-        default=20,
-        help="Maximum number of HTML pages to save in this run (default: 20).",
+        default=None,
+        help="Maximum number of HTML pages to save in this run (default: unlimited).",
     )
     parser.add_argument(
         "--delay",
@@ -27,7 +27,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> None:
     args = build_parser().parse_args()
 
-    if args.max_pages <= 0:
+    if args.max_pages is not None and args.max_pages <= 0:
         raise SystemExit("--max-pages must be greater than zero")
 
     settings = with_delay(Settings(), args.delay)
