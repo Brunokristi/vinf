@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-
-from bs4 import BeautifulSoup
+from html.parser import HTMLParser
 
 from .url_utils import (
     AuditedUrl,
@@ -11,6 +10,27 @@ from .url_utils import (
     derive_supported_urls,
     normalize_url,
 )
+
+
+class HrefParser(HTMLParser):
+    """Collect href values from <a> elements using only Python stdlib."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.hrefs: list[str] = []
+
+    def handle_starttag(
+        self,
+        tag: str,
+        attrs: list[tuple[str, str | None]],
+    ) -> None:
+        if tag.lower() != "a":
+            return
+
+        for name, value in attrs:
+            if name.lower() == "href":
+                self.hrefs.append(value or "")
+                break
 
 
 @dataclass(frozen=True)
@@ -22,18 +42,18 @@ class LinkExtractionResult:
 
 
 def extract_links_with_audit(html: str, source_url: str) -> LinkExtractionResult:
-    soup = BeautifulSoup(html, "html.parser")
+    parser = HrefParser()
+    parser.feed(html)
+    parser.close()
+
     eligible: list[str] = []
     derived: list[str] = []
     ignored: list[AuditedUrl] = []
     seen_eligible: set[str] = set()
     seen_derived: set[str] = set()
     seen_ignored: set[str] = set()
-    total_links = 0
 
-    for anchor in soup.find_all("a", href=True):
-        total_links += 1
-        href = anchor.get("href", "")
+    for href in parser.hrefs:
         normalized = normalize_url(href, source_url)
 
         if normalized is not None and classify_url_details(normalized) is not None:
@@ -61,7 +81,7 @@ def extract_links_with_audit(html: str, source_url: str) -> LinkExtractionResult
         eligible=eligible,
         derived=derived,
         ignored=ignored,
-        total_links=total_links,
+        total_links=len(parser.hrefs),
     )
 
 

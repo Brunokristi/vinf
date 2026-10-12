@@ -5,7 +5,7 @@ from dataclasses import replace
 import hashlib
 import time
 
-from bs4 import BeautifulSoup
+from html.parser import HTMLParser
 import requests
 
 from .config import Settings
@@ -37,10 +37,33 @@ class BiblicalCrawler:
 
     @staticmethod
     def extract_title(html: str) -> str | None:
-        soup = BeautifulSoup(html, "html.parser")
-        if soup.title is None:
-            return None
-        title = soup.title.get_text(" ", strip=True)
+        class TitleParser(HTMLParser):
+            def __init__(self) -> None:
+                super().__init__(convert_charrefs=True)
+                self.in_title = False
+                self.parts: list[str] = []
+
+            def handle_starttag(
+                self,
+                tag: str,
+                attrs: list[tuple[str, str | None]],
+            ) -> None:
+                if tag.lower() == "title":
+                    self.in_title = True
+
+            def handle_endtag(self, tag: str) -> None:
+                if tag.lower() == "title":
+                    self.in_title = False
+
+            def handle_data(self, data: str) -> None:
+                if self.in_title:
+                    self.parts.append(data)
+
+        parser = TitleParser()
+        parser.feed(html)
+        parser.close()
+
+        title = " ".join("".join(parser.parts).split())
         return title or None
 
     def crawl(self, max_pages: int | None = None) -> dict:
