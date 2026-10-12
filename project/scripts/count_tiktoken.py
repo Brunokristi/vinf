@@ -6,7 +6,8 @@ from pathlib import Path
 import tiktoken
 
 
-DOCUMENTS_FILE = Path("data/processed/documents.jsonl")
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DOCUMENTS_FILE = PROJECT_ROOT / "data" / "processed" / "documents.jsonl"
 ENCODING_NAME = "cl100k_base"
 
 

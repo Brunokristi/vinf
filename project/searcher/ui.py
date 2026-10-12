@@ -1,10 +1,7 @@
 from __future__ import annotations
 
 import json
-import os
 import re
-import shutil
-import subprocess
 from typing import Iterable
 
 from .engine import (
@@ -711,35 +708,12 @@ def show_detail(
     response: SearchResponse,
     result: SearchResult,
 ) -> None:
-    content = render_detail(
-        engine,
-        response,
-        result,
-    )
-
-    if shutil.which("less"):
-        env = os.environ.copy()
-
-        env["LESS"] = (
-            "-R -F -X"
-        )
-
-        subprocess.run(
-            [
-                "less",
-                "-R",
-            ],
-            input=content,
-            text=True,
-            env=env,
-            check=False,
-        )
-
-        return
-
-    print(
-        content
-    )
+    # Print the complete extracted text and ranking explanation directly into
+    # the CLI. Terminal scrollback remains available; no browser or pager is
+    # required.
+    print()
+    print(render_detail(engine, response, result))
+    print()
 
 
 HELP = """

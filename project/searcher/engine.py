@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+import heapq
 import math
-import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+from indexer.idf import idf as calculate_idf, log_tf
 
 from .query import ParsedQuery, parse_query
 from .storage import RandomAccessJsonl, find_document_id
@@ -122,21 +124,11 @@ class SearchEngine:
                 )
 
     def _idf(self, df: int, method: str) -> float:
-        n = self.document_count
-
-        if method == "classic":
-            return math.log(n / df)
-
-        if method == "smooth":
-            return math.log((n + 1) / (df + 1)) + 1.0
-
-        raise ValueError(f"Unknown IDF method: {method}")
+        return calculate_idf(method, self.document_count, df)
 
     @staticmethod
     def _tf_weight(tf: int) -> float:
-        if tf <= 0:
-            return 0.0
-        return 1.0 + math.log(tf)
+        return log_tf(tf)
 
     def _load_postings(self, term: str) -> dict[str, int]:
         if term in self.postings_cache:
@@ -312,12 +304,16 @@ class SearchEngine:
                         )
                     )
 
-        scored.sort(key=lambda item: (-item[0], item[1]))
+        top_scored = heapq.nsmallest(
+            limit,
+            scored,
+            key=lambda item: (-item[0], item[1]),
+        )
 
         results: list[SearchResult] = []
 
         for rank, (score, doc_key, matched) in enumerate(
-            scored[:limit],
+            top_scored,
             start=1,
         ):
             catalog = self._catalog(doc_key)
