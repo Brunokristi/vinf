@@ -6,7 +6,7 @@ from .configs.naves import CONFIG as NAVES_CONFIG
 from .configs.topical import CONFIG as TOPICAL_CONFIG
 from .configs.torrey import CONFIG as TORREY_CONFIG
 from .engine import extract_configured_sections, lines_to_text
-from .regex_html import html_title
+from .regex_html import html_title, html_to_lines
 from .utils import crawl_group_from_url, topic_from_url
 
 
@@ -25,12 +25,39 @@ def _title_from_html(html: str, fallback: str) -> tuple[str, str | None]:
     return title or fallback, source_title
 
 
+def _navigation_only_topical_page(html: str) -> bool:
+    """Recognize a real topical stub that contains only navigation/subtopics.
+
+    We intentionally keep this narrow. Unknown empty layouts must still fail
+    validation instead of being silently skipped.
+    """
+    lines = html_to_lines(html, TOPICAL_CONFIG)
+    article_heading = re.compile(
+        r"^Topical Encyclopedia(?: Introduction)?:?$",
+        re.IGNORECASE,
+    )
+    navigation_heading = re.compile(
+        r"^(?:Subtopics|Related Terms|Resources|Bible Hub)$",
+        re.IGNORECASE,
+    )
+
+    for index, line in enumerate(lines[:-1]):
+        if article_heading.search(line) and navigation_heading.search(lines[index + 1]):
+            return True
+    return False
+
+
 def extract_topical(html: str, url: str, crawl_group: str | None = None) -> dict:
     group = crawl_group or crawl_group_from_url(url, "topical") or "topical"
     config = CONFIG_BY_GROUP.get(group, TOPICAL_CONFIG)
     fallback = topic_from_url(url)
     title, source_title = _title_from_html(html, fallback)
     sections, lines = extract_configured_sections(html, config)
+    text = lines_to_text(lines)
+
+    skip_reason = None
+    if group == "topical" and not text and _navigation_only_topical_page(html):
+        skip_reason = "navigation_only_topical_page"
 
     return {
         "title": title,
@@ -38,5 +65,6 @@ def extract_topical(html: str, url: str, crawl_group: str | None = None) -> dict
         "topic": title,
         "source_collection": "contemporary" if group == "topical" else group,
         "sections": sections,
-        "text": lines_to_text(lines),
+        "text": text,
+        "_skip_reason": skip_reason,
     }

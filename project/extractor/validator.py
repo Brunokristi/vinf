@@ -69,7 +69,7 @@ def validate_document(document: dict) -> list[str]:
             errors.append("missing_topic")
         if not any(
             _has_text(sections.get(name))
-            for name in ("article", "naves_index", "torrey_textbook")
+            for name in ("article", "dictionary", "naves_index", "torrey_textbook")
         ):
             errors.append("missing_topical_content")
 

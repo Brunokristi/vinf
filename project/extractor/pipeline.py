@@ -105,6 +105,8 @@ class ExtractionPipeline:
         source_collection_counts: Counter[str] = Counter()
         error_counts: Counter[str] = Counter()
         valid_count = invalid_count = skipped_count = skipped_discovery_pages = 0
+        skipped_non_content_pages = 0
+        skip_reason_counts: Counter[str] = Counter()
         total_text_characters = 0
 
         with (
@@ -136,6 +138,12 @@ class ExtractionPipeline:
                     raw_path = self._resolve_raw_path(metadata)
                     html = raw_path.read_text(encoding="utf-8", errors="replace")
                     extracted = self._extract(html, metadata)
+                    skip_reason = extracted.pop("_skip_reason", None)
+                    if skip_reason:
+                        skipped_count += 1
+                        skipped_non_content_pages += 1
+                        skip_reason_counts[str(skip_reason)] += 1
+                        continue
 
                     document = {
                         "document_id": metadata["document_id"],
@@ -144,7 +152,7 @@ class ExtractionPipeline:
                         "crawl_group": crawl_group,
                         "fetched_at": metadata.get("fetched_at"),
                         "extracted_at": utc_now(),
-                        "extractor_version": "1.0-regex-config",
+                        "extractor_version": "1.2-regex-config",
                         "raw_html_path": metadata.get("raw_html_path"),
                         "source_content_hash": metadata.get("content_hash"),
                         **extracted,
@@ -194,6 +202,8 @@ class ExtractionPipeline:
             "invalid_documents": invalid_count,
             "skipped_documents": skipped_count,
             "skipped_discovery_pages": skipped_discovery_pages,
+            "skipped_non_content_pages": skipped_non_content_pages,
+            "skip_reason_counts": dict(sorted(skip_reason_counts.items())),
             "success_rate_percent": round(valid_count / eligible * 100, 2) if eligible else 0.0,
             "total_text_characters": total_text_characters,
             "source_type_counts": dict(sorted(type_counts.items())),

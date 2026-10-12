@@ -47,6 +47,16 @@ CONFIG = ExtractorConfig(
             end_patterns=REFERENCE_SECTION_END,
             required=False,
         ),
+        # Some topical pages are dictionary-style pages rather than a
+        # contemporary encyclopedia article (for example "niggardly").
+        SectionConfig(
+            name="dictionary",
+            start_patterns=(
+                re.compile(r"^Webster's Revised Unabridged Dictionary$", re.IGNORECASE),
+            ),
+            end_patterns=SECONDARY_SECTIONS,
+            required=False,
+        ),
         # Same idea for pages whose useful content is only Torrey's block.
         SectionConfig(
             name="torrey_textbook",
