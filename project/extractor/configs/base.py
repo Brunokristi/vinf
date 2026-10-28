@@ -9,13 +9,6 @@ Pattern = re.Pattern[str]
 
 @dataclass(frozen=True)
 class SectionConfig:
-    """One relevant text section inside a page.
-
-    start_patterns and end_patterns are matched against already-cleaned text lines.
-    The start marker itself is excluded by default. The first matching end marker
-    after the start is also excluded.
-    """
-
     name: str
     start_patterns: tuple[Pattern, ...]
     end_patterns: tuple[Pattern, ...]
@@ -25,8 +18,6 @@ class SectionConfig:
 
 @dataclass(frozen=True)
 class ExtractorConfig:
-    """Editable extraction rules for one crawl group."""
-
     crawl_group: str
     sections: tuple[SectionConfig, ...] = ()
     drop_line_patterns: tuple[Pattern, ...] = ()

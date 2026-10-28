@@ -26,11 +26,6 @@ def _title_from_html(html: str, fallback: str) -> tuple[str, str | None]:
 
 
 def _navigation_only_topical_page(html: str) -> bool:
-    """Recognize a real topical stub that contains only navigation/subtopics.
-
-    We intentionally keep this narrow. Unknown empty layouts must still fail
-    validation instead of being silently skipped.
-    """
     lines = html_to_lines(html, TOPICAL_CONFIG)
     article_heading = re.compile(
         r"^Topical Encyclopedia(?: Introduction)?:?$",

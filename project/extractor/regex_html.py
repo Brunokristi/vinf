@@ -5,9 +5,6 @@ import re
 
 from .configs.base import ExtractorConfig
 
-
-# Everything in this module is based on Python's re module. It intentionally
-# does not use BeautifulSoup, lxml, HTMLParser, XPath or CSS selectors.
 COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 DROP_ELEMENT_RE = re.compile(
     r"<(script|style|noscript|iframe|svg|canvas|form|select|button)\b[^>]*>"
@@ -49,7 +46,6 @@ def html_title(html: str) -> str | None:
 
 
 def html_to_lines(html: str, config: ExtractorConfig) -> list[str]:
-    """Convert raw HTML into text lines using regular expressions only."""
 
     value = html
 

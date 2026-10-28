@@ -13,7 +13,6 @@ from .url_utils import (
 
 
 class HrefParser(HTMLParser):
-    """Collect href values from <a> elements using only Python stdlib."""
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)

@@ -9,9 +9,6 @@ from extractor.topical import extract_topical
 from extractor.validator import validate_document
 
 
-# 30 representative HTML page fixtures: 5 for every supported crawl group.
-# They intentionally model the stable section markers used by the real
-# BibleHub pages while remaining small enough to ship with the code archive.
 BIBLE_CASES = [
     ("https://biblehub.com/genesis/1.htm", "Genesis creation light heavens earth"),
     ("https://biblehub.com/exodus/3.htm", "Moses burning bush Egypt deliverance"),

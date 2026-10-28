@@ -92,12 +92,6 @@ def is_allowed_url(url: str) -> bool:
 
 
 def derive_supported_urls(href: str, source_url: str) -> list[str]:
-    """Derive in-scope URLs from useful links that are not indexed themselves.
-
-    Bible chapter pages link to per-verse Bible pages such as
-    /genesis/1-1.htm. We deliberately do not crawl those duplicate verse pages,
-    but they give us the exact URL for the aggregated commentary page.
-    """
     canonical = _canonicalize_any_http_url(href, source_url)
     if canonical is None:
         return []

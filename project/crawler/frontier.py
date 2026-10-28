@@ -9,7 +9,6 @@ from .url_utils import crawl_group_for_url, normalize_url
 
 
 class Frontier:
-    """Persistent, balanced URL frontier with one FIFO queue per crawl group."""
 
     def __init__(self, storage: Storage, seed_file: Path):
         self.storage = storage
@@ -26,8 +25,6 @@ class Frontier:
                 continue
             self._enqueue_existing(url)
 
-        # Always read seeds. Existing URLs are ignored by add(), while newly
-        # configured groups/seeds can be introduced without deleting crawl state.
         self._load_seeds(seed_file)
 
     def _enqueue_existing(self, url: str) -> bool:

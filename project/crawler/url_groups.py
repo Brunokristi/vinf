@@ -167,8 +167,6 @@ URL_GROUPS: tuple[UrlGroupSpec, ...] = (
 CRAWL_GROUP_NAMES: tuple[str, ...] = tuple(group.name for group in URL_GROUPS)
 
 
-# Audit categories for links deliberately outside the active crawl scope.
-# Specific patterns must come before broad fallbacks.
 IGNORED_INTERNAL_PATTERNS: tuple[tuple[str, str, Pattern[str]], ...] = (
     ("bible_verse", "derived_resource", BIBLE_VERSE_RE),
     (
