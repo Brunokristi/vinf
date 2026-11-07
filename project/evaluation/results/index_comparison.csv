@@ -1,0 +1,17 @@
+query,mode,top_k,custom_time_ms,lucene_time_ms,overlap_count,overlap_ratio
+moses egypt,or,10,63.965,6.535,3,0.300
+moses egypt,and,10,21.007,3.003,3,0.300
+jesus resurrection,or,10,145.032,2.700,1,0.100
+jesus resurrection,and,10,26.931,1.925,1,0.100
+holy spirit,or,10,126.559,1.979,2,0.200
+holy spirit,and,10,67.183,1.944,2,0.200
+jerusalem temple,or,10,60.251,3.428,0,0.000
+jerusalem temple,and,10,20.605,1.682,0,0.000
+aaron priest,or,10,18.803,1.674,3,0.300
+aaron priest,and,10,5.270,1.594,3,0.300
+david king,or,10,88.666,1.759,2,0.200
+david king,and,10,33.668,1.398,2,0.200
+paul faith,or,10,195.489,1.565,3,0.300
+paul faith,and,10,78.250,1.684,3,0.300
+abraham covenant,or,10,70.648,1.182,2,0.200
+abraham covenant,and,10,17.123,1.037,2,0.200
